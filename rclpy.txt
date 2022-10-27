@@ -1,0 +1,3 @@
+# create pkg
+
+ros2 pkg create expy --build-type ament_python --dependencies rclpy std_msgs
