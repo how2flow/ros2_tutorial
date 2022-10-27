@@ -1,0 +1,3 @@
+# create pkg
+
+ros2 pkg create excpp --build-type ament_cmake --dependencies rclcpp std_msgs
