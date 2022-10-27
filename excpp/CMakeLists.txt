@@ -37,10 +37,17 @@ ament_target_dependencies(calculator
   rclcpp
 )
 
+add_executable(operator src/arithmetic/operator.cpp)
+ament_target_dependencies(operator
+  msg_srv_action_interface_example
+  rclcpp
+)
+
 # Install
 install(TARGETS
   argument
   calculator
+  operator
   DESTINATION lib/${PROJECT_NAME}
 )
 
