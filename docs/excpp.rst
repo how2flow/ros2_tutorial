@@ -67,6 +67,41 @@ Inst
   2. create_client<srv type>
   3. send_request
 
+Action
+==================
+- It is an asynchronous + synchronous bidirectional message transmission and reception method.
+- *action-client: set and send action-goal*
+- *action-server: receive action-goal and operate for goal, send action-feedback and action-result*
+
+Design
+::
+  Node (calculator)             Node (checker)
+  +-----------------+           +-----------------+
+  |                 |    [1]    |                 |
+  |                <------------->                |
+  |                 |    [2]    |                 |
+  | "Action Server"-------------->"Action Client" |
+  |                 |    [3]    |                 |
+  |                <------------->                |
+  |                 |           |                 |
+  +-----------------+           +-----------------+
+
+  [1] Action Goal (Goal Service) "server <-> client"
+  [2] Action Feedback (Feedback Topic) "server -> client"
+  [3] Action Result (Result Service) "server <-> client"
+
+Inst
+::
+  Action Server
+  1. set Node
+  2. create_server<action type>
+  3. define callback functions (goal, cancel, accepted)
+  ------------------------------
+  Action Client
+  1. set Node
+  2. crete_client<action type>
+  3. define callback functions (goal_response, feedback, result)
+
 Total
 ==================
 
@@ -74,10 +109,14 @@ Design
 ::
   Node (argument)              Node (calculator)
   +-------------------+        +--------------------+
-  |                   |        |                    |
-  | "Topic Publisher"----------->"Topic Subscriber" |
-  |                   | (a, b) |                    |
-  +-------------------+        |  "Service Server"  |
+  |                   |        |                    |          Node (checker)
+  | "Topic Publisher"----------->"Topic Subscriber" |          +-----------------+
+  |                   | (a, b) |                    |          |                 |
+  +-------------------+        |                   <------------>                |
+                               |   "Action Server" ------------->"Action Client" |
+                               |                   <------------>                |
+                               |                    |          |                 |
+                               |  "Service Server"  |          +-----------------+
                                |           ^        |
                                +-----------|--------+
                                            |
