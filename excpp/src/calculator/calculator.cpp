@@ -38,8 +38,12 @@ Calculator::Calculator(const rclcpp::NodeOptions & node_options)
   operator_.push_back("*");
   operator_.push_back("/");
 
+  this->declare_parameter("qos_depth", 10);
+  int8_t qos_depth = 0;
+  this->get_parameter("qos_depth", qos_depth);
+
   const auto QOS_RKL10V =
-    rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile();
+    rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
 
   arithmetic_argument_subscriber_ = this->create_subscription<ArithmeticArgument>(
     "arithmetic_argument",

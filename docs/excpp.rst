@@ -102,6 +102,62 @@ Inst
   2. crete_client<action type>
   3. define callback functions (goal_response, feedback, result)
 
+Parameter
+==================
+- It is possible to store, change, and recover specific values while the node is operating.
+- Each node has a parameter server.
+
+check
+::
+  $ ros2 topic list
+  /parameter_events
+  /rosout
+
+  $ ros2 service list # run argument node.
+  /argument/describe_parameters
+  /argument/get_parameter_types
+  /argument/get_parameters
+  /argument/list_parameters
+  /argument/set_parameters
+  /argument/set_parameters_atomically
+
+topic list
+- rosout: all node log.
+- parameter_events:
+  When subscribed, the node may check parameters that are created, changed, and deleted at runtime.
+
+service list
+- describe_parameters
+- get_parameter_types
+- get_parameters
+- list_parameters
+- set_parameters
+- set_parameters_atomically
+
+Design
+::
+  Node (argument)             Node (calculator)
+  +--------------------+       +--------------------+
+  |                    |       |                    |
+  | "Parameter Server" |       | "Parameter Server" |
+  |                    |       |                    |
+  +-------^----|-------+       +-------^----|-------+
+          |    |                       |    |
+          |    |                       |    |
+          |    v                       |    v
+         "Set Get"                   "Set Get"
+
+Inst
+::
+  Parameter Server (regist params)
+  1. parameter.yaml
+  2. launch file
+  --------------------------------
+  Parameter Client
+  1. declare_parameter
+  2. get_parameter
+  3. set callback function with "parameter_events"
+
 Total
 ==================
 
@@ -111,14 +167,18 @@ Design
   +-------------------+        +--------------------+
   |                   |        |                    |          Node (checker)
   | "Topic Publisher"----------->"Topic Subscriber" |          +-----------------+
-  |                   | (a, b) |                    |          |                 |
-  +-------------------+        |                   <------------>                |
-                               |   "Action Server" ------------->"Action Client" |
-                               |                   <------------>                |
-                               |                    |          |                 |
-                               |  "Service Server"  |          +-----------------+
-                               |           ^        |
-                               +-----------|--------+
+  | [p]               | (a, b) |                    |          |                 |
+  +-^--|--------------+        |                   <------------>                |
+    |  |                       |   "Action Server" ------------->"Action Client" |
+    |  | [p]: parameter server |                   <------------>                |
+    |  v                       |                    |          |                 |
+   set,get                     |  "Service Server"  |          +-----------------+
+                               | [p]       ^        |
+                               +-^--|------|--------+
+                                 |  |      |
+                                 |  |      |
+                                 |  v      |
+                                set,get    |
                                            |
   Node (operator)                          | Service-Server (response)
   +------------------+                     |   receive  '+'/'-'/'*'/'/'

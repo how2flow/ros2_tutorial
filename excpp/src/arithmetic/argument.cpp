@@ -16,8 +16,16 @@ Argument::Argument(const rclcpp::NodeOptions & node_options)
   min_random_num_(0.0),
   max_random_num_(9.0)
 {
+  this->declare_parameter("qos_depth", 10);
+  int8_t qos_depth = this->get_parameter("qos_depth").get_value<int8_t>();
+  this->declare_parameter("min_random_num", 0.0);
+  min_random_num_ = this->get_parameter("min_random_num").get_value<float>();
+  this->declare_parameter("max_random_num", 9.0);
+  max_random_num_ = this->get_parameter("max_random_num").get_value<float>();
+  this->update_parameter();
+
   const auto QOS_RKL10V =
-    rclcpp::QoS(rclcpp::KeepLast(10)).reliable().durability_volatile();
+    rclcpp::QoS(rclcpp::KeepLast(qos_depth)).reliable().durability_volatile();
 
   arithmetic_argument_publisher_ =
     this->create_publisher<ArithmeticArgument>("arithmetic_argument", QOS_RKL10V);
@@ -28,6 +36,34 @@ Argument::Argument(const rclcpp::NodeOptions & node_options)
 
 Argument::~Argument()
 {
+}
+
+void Argument::update_parameter()
+{
+  parameters_client_ = std::make_shared<rclcpp::AsyncParametersClient>(this);
+  while (!parameters_client_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      return;
+    }
+    RCLCPP_INFO(this->get_logger(), "service not available, waitting again...");
+  }
+
+  auto param_event_callback =
+    [this](const rcl_interfaces::msg::ParameterEvent::SharedPtr event) -> void
+    {
+      for (auto & changed_parameter : event->changed_parameters) {
+        if (changed_parameter.name == "min_random_num") {
+          auto value = rclcpp::Parameter::from_parameter_msg(changed_parameter).as_double();
+          min_random_num_ = value;
+        } else if (changed_parameter.name == "min_random_num") {
+          auto value = rclcpp::Parameter::from_parameter_msg(changed_parameter).as_double();
+          min_random_num_ = value;
+        }
+	  }
+	};
+
+  parameter_event_sub_ = parameters_client_->on_parameter_event(param_event_callback);
 }
 
 void Argument::publish_random_arithmetic_arguments()

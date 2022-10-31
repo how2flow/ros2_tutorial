@@ -26,5 +26,7 @@ private:
 
   rclcpp::Publisher<ArithmeticArgument>::SharedPtr arithmetic_argument_publisher_;
   rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr parameter_event_sub_;
+  rclcpp::AsyncParametersClient::SharedPtr parameters_client_;
 };
 #endif  // ARITHMETIC__ARGUMENT_HPP_
