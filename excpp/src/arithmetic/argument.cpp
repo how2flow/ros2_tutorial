@@ -5,6 +5,7 @@
 #include <random>
 
 #include "rclcpp/rclcpp.hpp"
+#include "rcutils/cmdline_parser.h"
 
 #include "arithmetic/argument.hpp"
 
@@ -45,8 +46,21 @@ void Argument::publish_random_arithmetic_arguments()
   RCLCPP_INFO(this->get_logger(), "Published argument_b %.2f", msg.argument_b);
 }
 
+void print_help()
+{
+  printf("For argument node:\n");
+  printf("node_name [-h]\n");
+  printf("Options:\n");
+  printf("\t-h Help           : Print this help function.\n");
+}
+
 int main(int argc, char * argv[])
 {
+  if (rcutils_cli_option_exist(argv, argv + argc, "-h")) {
+    print_help();
+    return 0;
+  }
+
   rclcpp::init(argc, argv);
   auto argument = std::make_shared<Argument>();
   rclcpp::spin(argument);

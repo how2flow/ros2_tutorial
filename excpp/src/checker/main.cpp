@@ -8,8 +8,21 @@
 
 #include "checker/checker.hpp"
 
+void print_help()
+{
+  printf("For Node node:\n");
+  printf("node_name [-h]\n");
+  printf("Options:\n");
+  printf("\t-h Help           : Print this help function.\n");
+}
+
 int main(int argc, char * argv[])
 {
+  if (rcutils_cli_option_exist(argv, argv + argc, "-h")) {
+    print_help();
+    return 0;
+  }
+
   rclcpp::init(argc, argv);
 
   float goal_total_sum = 50.0;

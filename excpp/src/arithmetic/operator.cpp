@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "rclcpp/rclcpp.hpp"
+#include "rcutils/cmdline_parser.h"
 
 #include "arithmetic/operator.hpp"
 
@@ -118,8 +119,21 @@ bool pull_trigger()
   return false;
 }
 
+void print_help()
+{
+  printf("For operator node:\n");
+  printf("node_name [-h]\n");
+  printf("Options:\n");
+  printf("\t-h Help           : Print this help function.\n");
+}
+
 int main(int argc, char * argv[])
 {
+  if (rcutils_cli_option_exist(argv, argv + argc, "-h")) {
+    print_help();
+    return 0;
+  }
+
   rclcpp::init(argc, argv);
   auto operator_node = std::make_shared<Operator>();
   while (rclcpp::ok()) {
